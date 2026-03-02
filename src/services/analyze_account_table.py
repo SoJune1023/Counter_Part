@@ -23,6 +23,7 @@ def analyze_account_table(
         .unique()
         .collect()
         .to_series()
+        .to_list()
     )
 
     result = ( # Get data that we need.
