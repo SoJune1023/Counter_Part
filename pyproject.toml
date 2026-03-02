@@ -3,9 +3,9 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "gl_tracker"
+name = "Counter_Part"
 version = "1.0.0"
-description = "GL Tracker"
+description = "Counter Part"
 
 [tool.setuptools.packages.find]
 where = ["."]
