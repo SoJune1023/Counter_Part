@@ -15,7 +15,7 @@ class AnalyzeAccountTable:
         return (
             lf.filter(pl.col(account_col) == account_name)
             .select(statement_id_col)
-            .unique()
+            .unique() # delete overlap ids
         )
     
     def _get_raw_data(
@@ -60,29 +60,29 @@ class AnalyzeAccountTable:
         summary_col: str = "적요"
     ):
         """Pivot data to object schema and sort it. Then return."""
-        data_with_idx = data.with_row_index("_row_id")
+        data_with_idx = data.with_row_index("_row_id") # Prevent duplicate summation on Pivot
 
         chabun_data = data_with_idx.select([
             "_row_id",
             statement_id_col,
             summary_col,
-            (pl.col(account_col) + pl.lit("(차변)")).alias("_account_type"),
-            pl.col(chabun_col).alias("_amount")
-        ]).filter(pl.col("_amount") > 0)
+            (pl.col(account_col) + pl.lit("(차변)")).alias("_account_type"), # Create new column name. example: 일반예금 -> 일반예금(차변)
+            pl.col(chabun_col).alias("_amount") # Unify numbers in 'chabun_col' column to common column name '_amount'
+        ]).filter(pl.col("_amount") > 0) # Extract only if amount > 0 (except for rows without 'chabun_col')
 
         daebun_data = data_with_idx.select([
             "_row_id",
             statement_id_col,
             summary_col,
-            (pl.col(account_col) + pl.lit("(대변)")).alias("_account_type"),
-            pl.col(daebun_col).alias("_amount")
-        ]).filter(pl.col("_amount") > 0)
+            (pl.col(account_col) + pl.lit("(대변)")).alias("_account_type"), # Create new column name. example: 일반예금 -> 일반예금(대변)
+            pl.col(daebun_col).alias("_amount") # Unify numbers in 'daebun_col' column to common column name '_amount'
+        ]).filter(pl.col("_amount") > 0) # Extract only if amount > 0 (except for rows without 'daebun_col)
 
         combined = pl.concat([chabun_data, daebun_data])
 
         return (
             combined.with_columns(
-                pl.lit(None).alias("분류")
+                pl.lit(None).alias("분류") # Create new column '분류'
             )
             .pivot(
                 index=["_row_id", statement_id_col, "분류", summary_col],
@@ -91,7 +91,7 @@ class AnalyzeAccountTable:
                 aggregate_function="first"
             )
             .fill_null(0)
-            .drop("_row_id")
+            .drop("_row_id") # Remove useless value
             .sort([statement_id_col, summary_col])
         )
 
