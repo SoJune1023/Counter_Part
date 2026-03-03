@@ -11,10 +11,13 @@ async def account_table(file: UploadFile, account_name: str):
     loop = asyncio.get_event_loop()
 
     await file.seek(0)
+
+    content = await file.read()
+
     result = await loop.run_in_executor(
         None,
         analyze_account_table,
-        file.file,
+        content,
         account_name
     )
 
