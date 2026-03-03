@@ -1,0 +1,119 @@
+/* 기본 배경 및 폰트 설정 */
+body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f3f4f6; /* 연한 그레이 배경 */
+    margin: 0;
+}
+
+/* 메인 카드 컨테이너 */
+.container {
+    background-color: #ffffff;
+    padding: 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 420px;
+    border: 1px solid #e5e7eb;
+}
+
+/* 제목 및 설명 */
+h2 {
+    margin: 0 0 0.5rem 0;
+    color: #111827;
+    font-size: 1.5rem;
+    font-weight: 800;
+    text-align: center;
+}
+
+.description {
+    color: #6b7280;
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+    text-align: center;
+    line-height: 1.5;
+}
+
+/* 업로드 박스 디자인 */
+.upload-box {
+    border: 2px dashed #d1d5db;
+    padding: 40px 20px;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    cursor: pointer;
+    border-radius: 12px;
+    background-color: #f9fafb;
+    transition: all 0.2s ease;
+}
+
+.upload-box:hover {
+    border-color: #3b82f6;
+    background-color: #eff6ff;
+}
+
+.upload-text {
+    color: #4b5563;
+    font-size: 0.95rem;
+    word-break: break-all;
+}
+
+/* 계정과목 입력창 스타일 */
+#accountNameInput {
+    width: 100%;
+    padding: 12px 16px;
+    margin-bottom: 1.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    box-sizing: border-box; /* 패딩이 너비에 포함되도록 설정 */
+    transition: border-color 0.2s, ring 0.2s;
+}
+
+#accountNameInput:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* 버튼 스타일 */
+.btn {
+    width: 100%;
+    padding: 14px;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.btn:hover {
+    background-color: #1d4ed8;
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+.btn:disabled {
+    background-color: #d1d5db; /* 회색조 */
+    color: #9ca3af;
+    cursor: not-allowed;
+    transform: none; /* 클릭 효과 제거 */
+    opacity: 0.7;
+}
+
+/* 상태 메시지 */
+#status {
+    margin-top: 1.5rem;
+    font-size: 0.875rem;
+    text-align: center;
+    min-height: 1.25rem;
+    color: #374151;
+    font-weight: 500;
+}
