@@ -4,23 +4,24 @@ import asyncio
 from fastapi import UploadFile
 from fastapi.responses import StreamingResponse
 
-from src.services import analyze_account_table
+from src.services import AnalyzeAccountTable
 
 async def account_table(file: UploadFile, account_name: str):
-    # analyze
-    loop = asyncio.get_event_loop()
-
-    await file.seek(0)
+    analyzer = AnalyzeAccountTable()
 
     content = await file.read()
 
+    loop = asyncio.get_running_loop()
+
+    await file.seek(0)
+
     result = await loop.run_in_executor(
         None,
-        analyze_account_table,
+        analyzer.process,
         content,
         account_name
     )
-
+    
     # upload result file to memory
     output = io.BytesIO()
     result.write_excel(output)
