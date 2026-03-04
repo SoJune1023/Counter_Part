@@ -3,7 +3,7 @@ import polars as pl
 from typing import IO
 from polars.exceptions import ShapeError
 
-from src.exceptions import ClientError
+from src.exceptions import ClientError, InternalServerError
 
 class AnalyzeAccountTable:
     def _read_excel(
@@ -14,6 +14,10 @@ class AnalyzeAccountTable:
     ) -> pl.LazyFrame:
         try:
             df = pl.read_excel(file_ptr, engine="calamine")
+
+            if df.is_empty():
+                raise ClientError(f"There is no data to get.", 400)
+
             return df.lazy().with_columns(
                 pl.col(statement_id_col).cast(pl.Utf8)
             )
@@ -169,5 +173,9 @@ class AnalyzeAccountTable:
         | 2026-001 | n   | 0           | 0           | 50,000 
         | 2026-002 | n   | 0           | 0           | 0
         """
+
+        # Is pivot_data emtpy? -> Raise ClientError
+        if pivot_data[statement_id_col] is None:
+            raise InternalServerError(f"Failed to analyze data.", 400)
 
         return pivot_data

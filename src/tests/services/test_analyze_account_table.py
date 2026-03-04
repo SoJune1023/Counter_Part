@@ -196,6 +196,50 @@ def test__collect_success(analyze_account_table):
     assert sorted(result["대변"]) == sorted(expected_result["대변"])
     assert sorted(result["적요"]) == sorted(expected_result["적요"])
 
+def test__collect_with_out_data(analyze_account_table):
+    mock_data = {
+        "전표번호": ["2026-001", "2026-001", "2026-002", "2026-002", "2026-003"],
+        "계정과목": ["투자수익", "투자수익", "임차료", "임차료" , "투자수익"],
+        "차변": [0, 50000, 2000000, 2000000, 0],
+        "대변": [50000, 0, 0, 0, 100000],
+        "적요": ["사무용품", "투자", "월세", "월세", "기타용품"]
+    }
+    mock_lf = pl.DataFrame(mock_data).lazy()
+
+    statement_ids = (
+        mock_lf.filter(pl.col("계정과목") == "보통예금")
+        .select("전표번호")
+        .unique()
+    )
+
+    raw_data = (
+        mock_lf.join(statement_ids, on="전표번호", how="semi")
+        .select([
+            "전표번호",
+            "계정과목",
+            "차변",
+            "대변",
+            "적요"
+        ])
+        .sort("전표번호")
+    )
+
+    result = analyze_account_table._collect(raw_data)
+
+    expected_result = {
+        "전표번호": [],
+        "계정과목": [],
+        "차변": [],
+        "대변": [],
+        "적요": []
+    }
+
+    assert sorted(result["전표번호"]) == sorted(expected_result["전표번호"])
+    assert sorted(result["계정과목"]) == sorted(expected_result["계정과목"])
+    assert sorted(result["차변"]) == sorted(expected_result["차변"])
+    assert sorted(result["대변"]) == sorted(expected_result["대변"])
+    assert sorted(result["적요"]) == sorted(expected_result["적요"])
+
 def test__pivot_success(analyze_account_table):
     mock_data = {
         "전표번호": ["2026-001", "2026-001", "2026-002"],
