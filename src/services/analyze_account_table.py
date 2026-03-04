@@ -1,4 +1,6 @@
 import polars as pl
+import logging
+logger = logging.getLogger(__name__)
 
 from typing import IO
 from polars.exceptions import ShapeError, ColumnNotFoundError
@@ -16,9 +18,11 @@ class AnalyzeAccountTable:
             df = pl.read_excel(file_ptr, engine="calamine")
 
             if df.is_empty():
+                logger.warning("There is nothing to get in file.")
                 raise ClientError(f"There is no data to get.", 400)
             
             if statement_id_col not in df.columns:
+                logger.warning(f"Failed to get column name '{statement_id_col}' in file.")
                 raise ClientError(f"Failed to get column name '{statement_id_col}' in file.", 400)
             
             return df.lazy().with_columns(
@@ -76,6 +80,7 @@ class AnalyzeAccountTable:
         try:
             return raw_data.collect()
         except ColumnNotFoundError as e:
+            logger.warning("Could not find column in file. Please check column name.", exc_info=True)
             raise ClientError(f"Could not find column in file. Please check column name.", 400) from e
 
     def _pivot(
@@ -184,6 +189,7 @@ class AnalyzeAccountTable:
 
         # Is pivot_data emtpy? -> Raise ClientError
         if pivot_data[statement_id_col] is None:
+            logging.error("Failed to analyze data. File is not emtpy, but result is emtpy.")
             raise InternalServerError(f"Failed to analyze data.", 400)
 
         return pivot_data
