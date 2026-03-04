@@ -17,7 +17,10 @@ class AnalyzeAccountTable:
 
             if df.is_empty():
                 raise ClientError(f"There is no data to get.", 400)
-
+            
+            if statement_id_col not in df.columns:
+                raise ClientError(f"Failed to get column name '{statement_id_col}' in file.", 400)
+            
             return df.lazy().with_columns(
                 pl.col(statement_id_col).cast(pl.Utf8)
             )
