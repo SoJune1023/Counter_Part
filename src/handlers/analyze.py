@@ -1,5 +1,7 @@
 import io
 import asyncio
+import logging
+logger = logging.getLogger(__name__)
 
 from fastapi import UploadFile
 from fastapi.responses import StreamingResponse
@@ -41,4 +43,5 @@ async def account_table(file: UploadFile, account_name: str):
     except (ClientError, InternalServerError):
         raise
     except Exception as e:
+        logger.error("Unexpected exception detected while analyze data. Please contact me. email: ssojune@naver.com.", exc_info=True)
         raise InternalServerError(f"Unexpected exception on /analyze/account_table POST. Exc info: {str(e)}", 500) from e
