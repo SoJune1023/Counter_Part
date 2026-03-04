@@ -1,8 +1,34 @@
 import polars as pl
 
 from typing import IO
+from polars.exceptions import ShapeError, ColumnNotFoundError
+
+from src.exceptions import ClientError, InternalServerError
 
 class AnalyzeAccountTable:
+    def _read_excel(
+        self,
+        file_ptr: IO[bytes],
+        *,
+        statement_id_col: str = "전표번호"
+    ) -> pl.LazyFrame:
+        try:
+            df = pl.read_excel(file_ptr, engine="calamine")
+
+            if df.is_empty():
+                raise ClientError(f"There is no data to get.", 400)
+            
+            if statement_id_col not in df.columns:
+                raise ClientError(f"Failed to get column name '{statement_id_col}' in file.", 400)
+            
+            return df.lazy().with_columns(
+                pl.col(statement_id_col).cast(pl.Utf8)
+            )
+        except ShapeError as e:
+            raise ClientError(f"Could not create dataform due wrong data shape.", 400) from e
+        except TypeError as e:
+            raise ClientError(f"Wrong type detected in file.", 400) from e
+
     def _get_statement_ids(
         self,
         lf: pl.LazyFrame,
@@ -47,7 +73,10 @@ class AnalyzeAccountTable:
         raw_data: pl.LazyFrame
     ):
         """Return collect result."""
-        return raw_data.collect()
+        try:
+            return raw_data.collect()
+        except ColumnNotFoundError as e:
+            raise ClientError(f"Could not find column in file. Please check column name.", 400) from e
 
     def _pivot(
         self,
@@ -106,9 +135,9 @@ class AnalyzeAccountTable:
         daebun_col: str = "대변",
         summary_col: str = "적요"
     ):
-        df = pl.read_excel(file_ptr, engine="calamine")
-        lf = df.lazy().with_columns(
-            pl.col(statement_id_col).cast(pl.Utf8)
+        lf = self._read_excel(
+            file_ptr,
+            statement_id_col=statement_id_col
         )
 
         statement_ids = self._get_statement_ids(
@@ -152,5 +181,9 @@ class AnalyzeAccountTable:
         | 2026-001 | n   | 0           | 0           | 50,000 
         | 2026-002 | n   | 0           | 0           | 0
         """
+
+        # Is pivot_data emtpy? -> Raise ClientError
+        if pivot_data[statement_id_col] is None:
+            raise InternalServerError(f"Failed to analyze data.", 400)
 
         return pivot_data
