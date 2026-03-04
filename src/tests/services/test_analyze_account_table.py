@@ -61,6 +61,34 @@ def test_analyze_account_table_success(analyze_account_table):
 
     assert result.select(expected_result.columns).equals(expected_result)
 
+def test_analyze_account_table_failed_wrong_column_name(analyze_account_table):
+    mock_data = {
+        "전표번호": ["2026-001", "2026-001", "2026-002"],
+        "계정-과목": ["소모품비", "보통예금", "보통예금"],
+        "차변": [50000, 0, 70000],
+        "대변": [0, 50000, 0],
+        "적요": ["사무용품", "이체", "입금"]
+    }
+    mock_df = pl.DataFrame(mock_data)
+
+    with patch("polars.read_excel") as mock_read:
+        mock_read.return_value = mock_df
+        
+        fake_file = io.BytesIO(b"fake excel data")
+        
+        with pytest.raises(ClientError, match="Could not find column in file. Please check column name."):
+            analyze_account_table.process(fake_file, "보통예금")
+
+def test_analyze_account_table_failed_type_error(analyze_account_table):
+    with patch("polars.read_excel") as mock_read:
+        mock_read.side_effect = TypeError("<type_error_info>")
+        
+        fake_file = io.BytesIO(b"fake excel data")
+        
+        with pytest.raises(ClientError, match="Wrong type detected in file."):
+            analyze_account_table.process(fake_file, "보통예금")
+
+
 def test__read_excel_success(analyze_account_table):
     mock_data = {
         "전표번호": ["2026-001", "2026-001", "2026-002"],

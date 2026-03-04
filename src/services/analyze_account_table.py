@@ -1,7 +1,7 @@
 import polars as pl
 
 from typing import IO
-from polars.exceptions import ShapeError
+from polars.exceptions import ShapeError, ColumnNotFoundError
 
 from src.exceptions import ClientError, InternalServerError
 
@@ -26,6 +26,8 @@ class AnalyzeAccountTable:
             )
         except ShapeError as e:
             raise ClientError(f"Could not create dataform due wrong data shape.", 400) from e
+        except TypeError as e:
+            raise ClientError(f"Wrong type detected in file.", 400) from e
 
     def _get_statement_ids(
         self,
@@ -71,7 +73,10 @@ class AnalyzeAccountTable:
         raw_data: pl.LazyFrame
     ):
         """Return collect result."""
-        return raw_data.collect()
+        try:
+            return raw_data.collect()
+        except ColumnNotFoundError as e:
+            raise ClientError(f"Could not find column in file. Please check column name.", 400) from e
 
     def _pivot(
         self,
