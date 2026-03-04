@@ -22,7 +22,7 @@ class AnalyzeAccountTable:
                 pl.col(statement_id_col).cast(pl.Utf8)
             )
         except ShapeError as e:
-            raise ClientError(f"Could not create dataform.", 400) from e
+            raise ClientError(f"Could not create dataform due wrong data shape.", 400) from e
 
     def _get_statement_ids(
         self,
