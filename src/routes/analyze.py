@@ -1,10 +1,19 @@
+import os
+import sys
+
 from fastapi import APIRouter, status, File, UploadFile, Form, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from src.handlers import account_table
 
-templates = Jinja2Templates(directory="src/templates")
+def get_resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)
+
+template_path = get_resource_path("static/templates") 
+templates = Jinja2Templates(directory=template_path)
 
 route = APIRouter(
     prefix="/analyze",
