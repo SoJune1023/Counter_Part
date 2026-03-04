@@ -3,8 +3,10 @@ import io
 import pytest
 
 from unittest.mock import patch
+from polars.exceptions import ShapeError
 
 from src.services.analyze_account_table import AnalyzeAccountTable 
+from src.exceptions import ClientError
 
 @pytest.fixture
 def analyze_account_table():
@@ -58,6 +60,38 @@ def test_analyze_account_table_success(analyze_account_table):
 
 
     assert result.select(expected_result.columns).equals(expected_result)
+
+def test__read_excel_success(analyze_account_table):
+    mock_data = {
+        "전표번호": ["2026-001", "2026-001", "2026-002"],
+        "계정과목": ["소모품비", "보통예금", "보통예금"],
+        "차변": [50000, 0, 70000],
+        "대변": [0, 50000, 0],
+        "적요": ["사무용품", "이체", "입금"]
+    }
+    mock_df = pl.DataFrame(mock_data)
+
+    expected_result = mock_df.lazy().with_columns(
+        pl.col("전표번호").cast(pl.Utf8)
+    )
+
+    with patch("polars.read_excel") as mock_read:
+        mock_read.return_value = mock_df
+        
+        fake_file = io.BytesIO(b"fake excel data")
+        
+        result = analyze_account_table._read_excel(fake_file, statement_id_col="전표번호")
+
+        assert result.collect().equals(expected_result.collect())
+
+def test__read_excel_failed_shape_error(analyze_account_table):
+    with patch("polars.read_excel") as mock_read:
+        mock_read.side_effect = ShapeError("<shape_error_info>")
+        
+        fake_file = io.BytesIO(b"fake excel data")
+        
+        with pytest.raises(ClientError, match="Could not create dataform."):
+            analyze_account_table._read_excel(fake_file, statement_id_col="전표번호")
 
 def test__get_statement_ids_success(analyze_account_table):
     mock_data = {
