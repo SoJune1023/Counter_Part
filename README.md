@@ -40,8 +40,7 @@ I used Vanilla JS for performance optimization and simple functionality.
 │   ├── handlers/       # Request handling logic (Route handlers)
 │   ├── routes/         # API endpoint definitions (Controllers)
 │   ├── services/       # Core business logic and use cases
-│   ├── static/         # Frontend static js and css files
-│   ├── templates/      # Frontend HTML files
 │   └── tests/          # Pytest suites (Side-effect mocking)
+├── static/             # Frontend static files (html, css, js)
 └── README.md
 ```
