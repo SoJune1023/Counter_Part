@@ -20,6 +20,6 @@ from src.routes.analyze import route as analyze_route
 @route.get("/", response_class=HTMLResponse)
 async def get_main_page(request: Request):
     """Serve main page"""
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse("analyze.html", {"request": request})
 
 ALL_ROUTER = [route, analyze_route]
