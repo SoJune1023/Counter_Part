@@ -102,7 +102,7 @@ class AnalyzeAccountTable:
             summary_col,
             (pl.col(account_col) + pl.lit("(차변)")).alias("_account_type"), # Create new column name. example: 일반예금 -> 일반예금(차변)
             pl.col(chabun_col).alias("_amount") # Unify numbers in 'chabun_col' column to common column name '_amount'
-        ]).filter(pl.col("_amount") >= 0) # Extract only if amount > 0 (except for rows without 'chabun_col')
+        ])
 
         daebun_data = data_with_idx.select([
             "_row_id",
@@ -110,7 +110,7 @@ class AnalyzeAccountTable:
             summary_col,
             (pl.col(account_col) + pl.lit("(대변)")).alias("_account_type"), # Create new column name. example: 일반예금 -> 일반예금(대변)
             pl.col(daebun_col).alias("_amount") # Unify numbers in 'daebun_col' column to common column name '_amount'
-        ]).filter(pl.col("_amount") >= 0) # Extract only if amount > 0 (except for rows without 'daebun_col)
+        ])
 
         combined = pl.concat([chabun_data, daebun_data])
 
