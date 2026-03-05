@@ -1,29 +1,18 @@
-import os
-import sys
+from fastapi import APIRouter, status, File, UploadFile, Form
 
-from fastapi import APIRouter, status, File, UploadFile, Form, Request
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
-
-from src.handlers import account_table
-
-def get_resource_path(relative_path):
-    if hasattr(sys, '_MEIPASS'):
-        return os.path.join(sys._MEIPASS, relative_path)
-    return os.path.join(os.path.abspath("."), relative_path)
-
-template_path = get_resource_path("static/templates") 
-templates = Jinja2Templates(directory=template_path)
+from src.handlers import account_table, analyze_page
 
 route = APIRouter(
     prefix="/analyze",
     tags=['analyze']
 )
 
-@route.get("/", response_class=HTMLResponse)
-async def get_analyze_page(request: Request):
-    """Serve main page"""
-    return templates.TemplateResponse("index.html", {"request": request})
+@route.post("/", status_code=status.HTTP_200_OK)
+async def post_analyze_page(
+    file: UploadFile = File(...)
+):
+    """Get data for main page"""
+    return await analyze_page(file)
 
 @route.post("/account_table", tags=['account_table'], status_code=status.HTTP_200_OK)
 async def post_account_table(

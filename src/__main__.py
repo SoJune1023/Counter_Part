@@ -31,7 +31,7 @@ def run():
         app.include_router(router)
     logger.info("Success to add router.")    
 
-    url = "http://127.0.0.1:8000/analyze/"
+    url = "http://127.0.0.1:8000/"
     webbrowser.open(url)
     
     uvicorn.run(
