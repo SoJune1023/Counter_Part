@@ -1,5 +1,6 @@
 import io
 import asyncio
+import pyarrow as pa
 import logging
 logger = logging.getLogger(__name__)
 
@@ -25,13 +26,17 @@ async def analyze_page(file: UploadFile):
             content
         )
 
-        output = io.BytesIO()
-        result.write_ipc(output)
-        output.seek(0)
+        arrow_table = result.to_arrow()
+
+        sink = io.BytesIO()
+        with pa.ipc.new_stream(sink, arrow_table.schema) as writer:
+            writer.write_table(arrow_table)
+        
+        await file.seek(0)
         
         return Response(
-            content=output.getvalue(),
-            media_type="application/octet-stream"
+            content=sink.getvalue(),
+            media_type="application/vnd.apache.arrow.stream" # 스트림 전용 MIME 타입
         )
     except (ClientError, InternalServerError):
         raise
