@@ -63,6 +63,35 @@ class AnalyzeGetExcel:
             logger.warning("Could not find column in file. Please check column name.", exc_info=True)
             raise ClientError(f"Could not find column in file. Please check column name.", 400) from e
     
+    def _pivot(
+        self,
+        data: pl.DataFrame,
+        *,
+        statement_id_col: str = "전표번호",
+        account_col: str = "계정과목",
+        chabun_col: str = "차변",
+        daebun_col: str = "대변",
+        summary_col: str = "적요"
+    ) -> pl.DataFrame:
+        """Pivot data to object schema and sort it. Then return."""
+        result = data.group_by(statement_id_col).agg([
+            pl.col(summary_col).first().alias(summary_col), # 가장 위의 적요 유지
+            pl.col(chabun_col).sum().alias(chabun_col),     # 해당 전표의 차변 전체 합계
+            pl.col(daebun_col).sum().alias(daebun_col)      # 해당 전표의 대변 전체 합계
+        ])
+
+        return (
+            result
+            .select([
+                statement_id_col,
+                summary_col,
+                chabun_col,
+                daebun_col
+            ])
+            .sort(statement_id_col)
+            .fill_null(0)
+        )
+    
     def process(
         self,
         file_ptr: IO[bytes],
@@ -88,10 +117,19 @@ class AnalyzeGetExcel:
             summary_col=summary_col
         )
 
-        collect_data = self._collect(raw_data)
+        collected_data = self._collect(raw_data)
 
-        if collect_data[statement_id_col] is None:
+        pivot_data = self._pivot(
+            collected_data,
+            statement_id_col=statement_id_col,
+            account_col=account_col,
+            chabun_col=chabun_col,
+            daebun_col=daebun_col,
+            summary_col=summary_col
+        )
+
+        if pivot_data[statement_id_col] is None:
             logging.error("Failed to load data. File is not emtpy, but result is emtpy.")
             raise InternalServerError(f"Failed to load data.", 400)
         
-        return collect_data
+        return pivot_data
