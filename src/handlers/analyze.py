@@ -10,7 +10,7 @@ from fastapi.responses import StreamingResponse, Response
 from src.services import AnalyzeAccountTable, AnalyzeGetExcel
 from src.exceptions import InternalServerError, ClientError
 
-async def analyze_page(file: UploadFile):
+async def analyze_file(file: UploadFile):
     try:
         loader = AnalyzeGetExcel()
 
@@ -44,7 +44,42 @@ async def analyze_page(file: UploadFile):
         logger.error("Unexpected exception detected while get excel data. Please contact me. email: ssojune@naver.com.", exc_info=True)
         raise InternalServerError(f"Unexpected exception on /analyze GET. Exc info: {str(e)}", 500) from e
 
-async def account_table(file: UploadFile, account_name: str):
+async def analyze_account_table(file: UploadFile, account_name: str):
+    try:
+        analyzer = AnalyzeAccountTable()
+
+        content = await file.read()
+
+        loop = asyncio.get_running_loop()
+
+        await file.seek(0)
+
+        result = await loop.run_in_executor(
+            None,
+            analyzer.process,
+            content,
+            account_name
+        )
+        
+        arrow_table = result.to_arrow()
+
+        sink = io.BytesIO()
+        with pa.ipc.new_stream(sink, arrow_table.schema) as writer:
+            writer.write_table(arrow_table)
+        
+        await file.seek(0)
+        
+        return Response(
+            content=sink.getvalue(),
+            media_type="application/vnd.apache.arrow.stream" # 스트림 전용 MIME 타입
+        )
+    except (ClientError, InternalServerError):
+        raise
+    except Exception as e:
+        logger.error("Unexpected exception detected while analyze data. Please contact me. email: ssojune@naver.com.", exc_info=True)
+        raise InternalServerError(f"Unexpected exception on /analyze/account_table POST. Exc info: {str(e)}", 500) from e
+
+async def analyze_account_table_download(file: UploadFile, account_name: str):
     try:
         analyzer = AnalyzeAccountTable()
 

@@ -5,7 +5,7 @@ from fastapi import APIRouter, status, File, UploadFile, Form, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 
-from src.handlers import account_table, analyze_page
+from src.handlers import analyze_account_table, analyze_file, analyze_account_table_download
 
 def get_resource_path(relative_path):
     if hasattr(sys, '_MEIPASS'):
@@ -23,25 +23,27 @@ route = APIRouter(
 @route.get("/", response_class=HTMLResponse)
 async def get_main_page(request: Request):
     """Serve main page"""
-    return templates.TemplateResponse("analyze.html", {"request": request})
+    return templates.TemplateResponse("index.html", {"request": request})
 
-
-@route.post("/", status_code=status.HTTP_200_OK)
-async def post_analyze_page(
+@route.post("/file", tags=['file'], status_code=status.HTTP_200_OK)
+async def post_analyze_file(
     file: UploadFile = File(...)
 ):
     """Get data for main page"""
-    return await analyze_page(file)
-
-@route.get("/account_table", tags=['account_table'], status_code=status.HTTP_200_OK)
-async def get_account_table(request: Request):
-    """Get excel file and return analyze result."""
-    return templates.TemplateResponse("analyze_table.html", {"request": request})
+    return await analyze_file(file)
 
 @route.post("/account_table", tags=['account_table'], status_code=status.HTTP_200_OK)
-async def post_account_table(
+async def post_analyze_account_table(
     file: UploadFile = File(...),
     account_name: str = Form(...)
 ):
     """Get excel file and return analyze result."""
-    return await account_table(file, account_name)
+    return await analyze_account_table(file, account_name)
+
+@route.post("/account_table/download", tags=['download'], status_code=status.HTTP_200_OK)
+async def get_analyze_account_table_download(
+    file: UploadFile = File(...),
+    account_name: str = Form(...)
+):
+    """Get excel file and return analyze file."""
+    return await analyze_account_table_download(file, account_name)

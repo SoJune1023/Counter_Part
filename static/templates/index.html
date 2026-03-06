@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyze Account ID</title>
+
+    <link rel="stylesheet" href="/static/css/index.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/gridjs/dist/gridjs.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js"></script>
+</head>
+<body>
+    <div class="upload-section">
+        <div class="main-file-upload-button">
+            <input type="file" id="fileInput" accept=".xlsx" hidden>
+            <label for="fileInput" class="custom-file-upload">파일 선택</label>
+            <span id="fileName">선택된 파일 없음</span>
+            <button id="uploadBtn" disabled>계정과목 분석 시작</button>
+        </div>
+        <div class="analuze-upload-button">
+            <input type="text" id="accountNameInput" placeholder="계정과목 컬럼명 입력" value="계정과목">
+            <button id="analyzeBtn" disabled>데이터 변환</button>
+        </div>
+        <div class="download_analyze-button">
+            <button id="downloadBtn" disabled>데이터 다운로드</button>
+        </div>
+        <div id="statusText" class="status-bar">파일 업로드 필요.</div>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="main-file-section">
+            <div id="grid-table"></div>
+        </div>
+
+        <div class="result-file-section">
+            <div id="result-grid-table"></div>
+        </div>
+    </div>
+
+    <script type="module" src="/static/js/analyze.js"></script>
+</body>
+</html>
