@@ -68,16 +68,15 @@ class AnalyzeGetExcel:
         data: pl.DataFrame,
         *,
         statement_id_col: str = "전표번호",
-        account_col: str = "계정과목",
         chabun_col: str = "차변",
         daebun_col: str = "대변",
         summary_col: str = "적요"
     ) -> pl.DataFrame:
         """Pivot data to object schema and sort it. Then return."""
         result = data.group_by(statement_id_col).agg([
-            pl.col(summary_col).first().alias(summary_col), # 가장 위의 적요 유지
-            pl.col(chabun_col).sum().alias(chabun_col),     # 해당 전표의 차변 전체 합계
-            pl.col(daebun_col).sum().alias(daebun_col)      # 해당 전표의 대변 전체 합계
+            pl.col(summary_col).first().alias(summary_col),
+            pl.col(chabun_col).sum().alias(chabun_col),
+            pl.col(daebun_col).sum().alias(daebun_col)
         ])
 
         return (
