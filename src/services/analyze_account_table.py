@@ -94,39 +94,46 @@ class AnalyzeAccountTable:
         summary_col: str = "적요"
     ):
         """Pivot data to object schema and sort it. Then return."""
-        data_with_idx = data.with_row_index("_row_id") # Prevent duplicate summation on Pivot
+        chabun_sum = (
+            data
+            .group_by([statement_id_col, account_col])
+            .agg(pl.col(chabun_col).sum().alias("_amount"))
+            .with_columns((pl.col(account_col) + pl.lit("(차변)")).alias("_account_type"))
+        )
 
-        chabun_data = data_with_idx.select([
-            "_row_id",
-            statement_id_col,
-            summary_col,
-            (pl.col(account_col) + pl.lit("(차변)")).alias("_account_type"), # Create new column name. example: 일반예금 -> 일반예금(차변)
-            pl.col(chabun_col).alias("_amount") # Unify numbers in 'chabun_col' column to common column name '_amount'
+        daebun_sum = (
+            data
+            .group_by([statement_id_col, account_col])
+            .agg(pl.col(daebun_col).sum().alias("_amount"))
+            .with_columns((pl.col(account_col) + pl.lit("(대변)")).alias("_account_type"))
+        )
+
+        combined_sum = pl.concat([
+            chabun_sum.select([statement_id_col, "_account_type", "_amount"]),
+            daebun_sum.select([statement_id_col, "_account_type", "_amount"])
         ])
 
-        daebun_data = data_with_idx.select([
-            "_row_id",
-            statement_id_col,
-            summary_col,
-            (pl.col(account_col) + pl.lit("(대변)")).alias("_account_type"), # Create new column name. example: 일반예금 -> 일반예금(대변)
-            pl.col(daebun_col).alias("_amount") # Unify numbers in 'daebun_col' column to common column name '_amount'
-        ])
+        pivoted = combined_sum.pivot(
+            index=statement_id_col,
+            on="_account_type",
+            values="_amount",
+            aggregate_function="sum"
+        ).fill_null(0)
 
-        combined = pl.concat([chabun_data, daebun_data])
+        summary_map = data.group_by(statement_id_col).agg(
+            pl.col(summary_col).first()
+        )
 
         return (
-            combined.with_columns(
-                pl.lit(None).alias("분류") # Create new column '분류'
-            )
-            .pivot(
-                index=["_row_id", statement_id_col, "분류", summary_col],
-                on="_account_type",
-                values="_amount",
-                aggregate_function="first"
-            )
-            .fill_null(0)
-            .drop("_row_id") # Remove useless value
-            .sort([statement_id_col, summary_col])
+            pivoted.join(summary_map, on=statement_id_col, how="left")
+            .with_columns(pl.lit(None).alias("분류"))
+            .select([
+                statement_id_col,
+                "분류",
+                summary_col,
+                pl.all().exclude([statement_id_col, "분류", summary_col])
+            ])
+            .sort(statement_id_col)
         )
 
     def process(
