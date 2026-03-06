@@ -1,5 +1,5 @@
-from src.handlers.analyze import account_table, analyze_page
+from src.handlers.analyze import analyze_account_table, analyze_file, analyze_account_table_download
 
 __all__ = [
-    account_table, analyze_page
+    analyze_account_table, analyze_file, analyze_account_table_download
 ]
