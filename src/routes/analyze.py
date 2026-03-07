@@ -41,7 +41,7 @@ async def post_analyze_account_table(
     return await analyze_account_table(file, account_name)
 
 @route.post("/account_table/download", tags=['download'], status_code=status.HTTP_200_OK)
-async def get_analyze_account_table_download(
+async def post_analyze_account_table_download(
     file: UploadFile = File(...),
     account_name: str = Form(...)
 ):
