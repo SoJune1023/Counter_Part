@@ -44,6 +44,42 @@ async def analyze_file(file: UploadFile):
         logger.error("Unexpected exception detected while get excel data. Please contact me. email: ssojune@naver.com.", exc_info=True)
         raise InternalServerError(f"Unexpected exception on /analyze GET. Exc info: {str(e)}", 500) from e
 
+async def analyze_file_download(file: UploadFile):
+    try:
+        loader = AnalyzeGetExcel()
+
+        content = await file.read()
+
+        loop = asyncio.get_running_loop()
+
+        await file.seek(0)
+
+        result = await loop.run_in_executor(
+            None,
+            loader.process,
+            content
+        )
+
+        # upload result file to memory
+        output = io.BytesIO()
+        result.write_excel(output)
+        output.seek(0)
+
+        # set file name
+        filename = f"result_{file.filename}"
+
+        # return result
+        return StreamingResponse(
+            output,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+    except (ClientError, InternalServerError):
+        raise
+    except Exception as e:
+        logger.error("Unexpected exception detected while get excel data. Please contact me. email: ssojune@naver.com.", exc_info=True)
+        raise InternalServerError(f"Unexpected exception on /analyze GET. Exc info: {str(e)}", 500) from e
+
 async def analyze_account_table(file: UploadFile, account_name: str):
     try:
         analyzer = AnalyzeAccountTable()
