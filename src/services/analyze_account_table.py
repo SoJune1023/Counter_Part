@@ -75,7 +75,7 @@ class AnalyzeAccountTable:
     def _collect(
         self,
         raw_data: pl.LazyFrame
-    ):
+    ) -> pl.DataFrame:
         """Return collect result."""
         try:
             return raw_data.collect()
@@ -92,7 +92,7 @@ class AnalyzeAccountTable:
         chabun_col: str = "차변",
         daebun_col: str = "대변",
         summary_col: str = "적요"
-    ):
+    ) -> pl.DataFrame:
         """Pivot data to object schema and sort it. Then return."""
         chabun_sum = (
             data
@@ -146,7 +146,7 @@ class AnalyzeAccountTable:
         chabun_col: str = "차변",
         daebun_col: str = "대변",
         summary_col: str = "적요"
-    ):
+    ) -> pl.DataFrame:
         lf = self._read_excel(
             file_ptr,
             statement_id_col=statement_id_col
