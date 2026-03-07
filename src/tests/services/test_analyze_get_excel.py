@@ -31,11 +31,10 @@ def test_process_success(analyze_get_excel):
         result = analyze_get_excel.process(fake_file)
 
     expected_result_data = mock_data = {
-        "전표번호": ["2026-001", "2026-001", "2026-002"],
-        "계정과목": ["소모품비", "보통예금", "보통예금"],
-        "차변": [50000, 0, 70000],
-        "대변": [0, 50000, 0],
-        "적요": ["사무용품", "이체", "입금"]
+        "전표번호": ["2026-001", "2026-002"],
+        "차변": [50000, 70000],
+        "대변": [50000, 0],
+        "적요": ["사무용품", "입금"]
     }
     expected_result = pl.DataFrame(expected_result_data)
 
