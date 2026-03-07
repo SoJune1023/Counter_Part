@@ -1,6 +1,8 @@
 import os
 import sys
 import webbrowser
+import asyncio
+import socket
 import logging
 import uvicorn
 
@@ -21,7 +23,7 @@ app.mount("/static", StaticFiles(directory=static_path), name="static")
 
 from src.routes import ALL_ROUTER
 
-def run():
+async def run():
     # Set logging
     from src.config import init_logger
     logger = logging.getLogger(__name__)
@@ -31,14 +33,35 @@ def run():
         app.include_router(router)
     logger.info("Success to add router.")    
 
-    url = "http://127.0.0.1:8000/analyze"
-    webbrowser.open(url)
-    
-    uvicorn.run(
+    host = "127.0.0.1"
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    sock.bind((host, 0))
+    sock.setblocking(False)
+
+    actual_port = sock.getsockname()[1]
+    url = f"http://{host}:{actual_port}/analyze"
+
+    config = uvicorn.Config(
         app,
-        host="127.0.0.1",
-        port=8000
+        host=host,
+        port=actual_port,
+        fd=sock.fileno()
     )
+    server = uvicorn.Server(config)
+
+    loop = asyncio.get_event_loop()
+    loop.call_later(0.5, lambda: webbrowser.open(url))
+
+    try:
+        await server.serve()
+    except (KeyboardInterrupt, SystemExit):
+        pass
+    finally:
+        sock.close()
 
 if __name__ == '__main__':
-    run()
+    try:
+        asyncio.run(run())
+    except KeyboardInterrupt:
+        pass
