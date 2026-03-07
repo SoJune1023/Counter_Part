@@ -5,8 +5,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('fileInput');
     const accountNameInput = document.getElementById('accountNameInput');
     const uploadBtn = document.getElementById('uploadBtn');
+    const uploadedDownloadBtn = document.getElementById('uploadedDownloadBtn')
     const analyzeBtn = document.getElementById('analyzeBtn');
-    const downloadBtn = document.getElementById('downloadBtn');
+    const analyzeDownloadBtn = document.getElementById('analyzeDownloadBtn');
     const statusDiv = document.getElementById('statusText');
     const fileNameSpan = document.getElementById('fileName');
 
@@ -26,9 +27,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const hasAccount = accountValue.length > 0 && accountValue !== "계정과목";
         
         uploadBtn.disabled = !hasFile;
+        uploadedDownloadBtn.disabled = !hasFile;
         
         analyzeBtn.disabled = !(hasFile && hasAccount);
-        downloadBtn.disabled = !(hasFile && hasAccount);
+        analyzeDownloadBtn.disabled = !(hasFile && hasAccount);
         
         if (hasFile) {
             fileNameSpan.innerText = fileInput.files[0].name;
@@ -121,6 +123,46 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    uploadedDownloadBtn.onclick = async () => {
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        formData.append('account_name', accountNameInput.value.trim());
+
+        try {
+            uploadedDownloadBtn.disabled = true;
+            statusDiv.innerText = "데이터 다운로드 중 . . .";
+
+            const response = await fetch('/analyze/file/download', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) throw new Error('서버 처리 실패');
+
+            const blob = await response.blob();
+            const excelBlob = new Blob([blob], { 
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+            });
+
+            const url = window.URL.createObjectURL(excelBlob);
+            const a = document.createElement('a');
+            a.href = url;
+
+            a.download = `simple_${fileInput.files[0].name}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            statusDiv.innerText = "파일 변환 완료";
+        } catch (error) {
+            statusDiv.innerText = "에러: " + error.message;
+            console.error(error);
+        } finally {
+            uploadedDownloadBtn.disabled = false;
+        }
+    };
+
     analyzeBtn.onclick = async () => {
         const formData = new FormData();
         formData.append('file', fileInput.files[0]);
@@ -203,13 +245,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    downloadBtn.onclick = async () => {
+    analyzeDownloadBtn.onclick = async () => {
         const formData = new FormData();
         formData.append('file', fileInput.files[0]);
         formData.append('account_name', accountNameInput.value.trim());
 
         try {
-            downloadBtn.disabled = true;
+            analyzeDownloadBtn.disabled = true;
             statusDiv.innerText = "데이터 다운로드 중 . . .";
 
             const response = await fetch('/analyze/account_table/download', {
@@ -239,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
             statusDiv.innerText = "에러: " + error.message;
             console.error(error);
         } finally {
-            downloadBtn.disabled = false;
+            analyzeDownloadBtn.disabled = false;
         }
     };
 })
