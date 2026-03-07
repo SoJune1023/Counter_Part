@@ -121,7 +121,6 @@ class AnalyzeGetExcel:
         pivot_data = self._pivot(
             collected_data,
             statement_id_col=statement_id_col,
-            account_col=account_col,
             chabun_col=chabun_col,
             daebun_col=daebun_col,
             summary_col=summary_col
