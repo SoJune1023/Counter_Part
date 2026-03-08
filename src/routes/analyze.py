@@ -5,7 +5,7 @@ from fastapi import APIRouter, status, File, UploadFile, Form, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 
-from src.handlers import analyze_account_table, analyze_file, analyze_account_table_download, analyze_file_download
+from src.handlers import analyze_account_table, analyze_file, analyze_account_table_download, analyze_file_download, analyze_get_tb_table, analyze_get_tb_table_download
 
 def get_resource_path(relative_path):
     if hasattr(sys, '_MEIPASS'):
@@ -26,18 +26,18 @@ async def get_main_page(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 @route.post("/file", tags=['file'], status_code=status.HTTP_200_OK)
-async def post_analyze_file(
+async def post_nalyze_get_tb_table(
     file: UploadFile = File(...)
 ):
     """Get data for main page"""
-    return await analyze_file(file)
+    return await analyze_get_tb_table(file)
 
 @route.post("/file/download", tags=['download'], status_code=status.HTTP_200_OK)
-async def post_analyze_file_download(
+async def post_nalyze_get_tb_table_download(
     file: UploadFile = File(...)
 ):
     """Download simplification file."""
-    return await analyze_file_download(file)
+    return await analyze_get_tb_table_download(file)
 
 @route.post("/account_table", tags=['account_table'], status_code=status.HTTP_200_OK)
 async def post_analyze_account_table(
