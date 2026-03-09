@@ -32,26 +32,11 @@ class AnalyzeAccountTable:
             raise ClientError(f"Could not create dataform due wrong data shape.", 400) from e
         except TypeError as e:
             raise ClientError(f"Wrong type detected in file.", 400) from e
-
-    def _get_statement_ids(
-        self,
-        lf: pl.LazyFrame,
-        *,
-        account_name: str,
-        statement_id_col: str = "전표번호",
-        account_col: str = "계정과목"
-    ) -> pl.LazyFrame:
-        """Get statement numbers WHERE account_col is account_name."""
-        return (
-            lf.filter(pl.col(account_col) == account_name)
-            .select(statement_id_col)
-            .unique() # delete overlap ids
-        )
     
-    def _get_raw_data(
+    def _get_data(
         self,
-        statement_ids: pl.LazyFrame,
         lf: pl.LazyFrame,
+        account_name: str,
         *,
         statement_id_col: str = "전표번호",
         account_col: str = "계정과목",
@@ -59,7 +44,14 @@ class AnalyzeAccountTable:
         daebun_col: str = "대변",
         summary_col: str = "적요"
     ) -> pl.LazyFrame:
-        """Get data that WHERE statement_id is in statement_ids."""
+        """Get statement numbers WHERE account_col is account_name.  
+        And Get data that WHERE statement_id is in statement_ids."""
+        statement_ids = (
+            lf.filter(pl.col(account_col) == account_name)
+            .select(statement_id_col)
+            .unique() # delete overlap ids
+        )
+
         return (
             lf.join(statement_ids, on=statement_id_col, how="semi")
             .select([
@@ -152,16 +144,9 @@ class AnalyzeAccountTable:
             statement_id_col=statement_id_col
         )
 
-        statement_ids = self._get_statement_ids(
+        raw_data = self._get_data(
             lf,
-            account_name=account_name,
-            statement_id_col=statement_id_col,
-            account_col=account_col
-        )
-
-        raw_data = self._get_raw_data(
-            statement_ids,
-            lf,
+            account_name,
             statement_id_col=statement_id_col,
             account_col=account_col,
             chabun_col=chabun_col,

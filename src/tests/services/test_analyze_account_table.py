@@ -149,28 +149,28 @@ def test__read_excel_failed_column_not_found(analyze_account_table):
         with pytest.raises(ClientError, match="Failed to get column name '전표번호' in file."):
             analyze_account_table._read_excel(fake_file, statement_id_col="전표번호")
 
-def test__get_statement_ids_success(analyze_account_table):
-    mock_data = {
-        "전표번호": ["2026-001", "2026-001", "2026-002", "2026-002", "2026-003"],
-        "계정과목": ["보통예금", "보통예금", "임차료", "임차료" , "보통예금"],
-        "차변": [0, 0, 2000000, 2000000, 0],
-        "대변": [50000, 50000, 0, 0, 100000],
-        "적요": ["사무용품", "사무용품", "월세", "월세", "기타용품"]
-    }
-    mock_lf = pl.DataFrame(mock_data).lazy()
+# def test__get_statement_ids_success(analyze_account_table):
+#     mock_data = {
+#         "전표번호": ["2026-001", "2026-001", "2026-002", "2026-002", "2026-003"],
+#         "계정과목": ["보통예금", "보통예금", "임차료", "임차료" , "보통예금"],
+#         "차변": [0, 0, 2000000, 2000000, 0],
+#         "대변": [50000, 50000, 0, 0, 100000],
+#         "적요": ["사무용품", "사무용품", "월세", "월세", "기타용품"]
+#     }
+#     mock_lf = pl.DataFrame(mock_data).lazy()
 
-    result = analyze_account_table._get_statement_ids(
-        mock_lf,
-        account_name="보통예금", 
-        statement_id_col="전표번호", 
-        account_col="계정과목"
-    ).collect()
-    # result = shape: (2,)\nSeries: '전표번호' [str]\n[\n      "2026-001"\n    "2026-003"\n]
-    # 추후 to_series(), to_list() 해줘야 ["2026-001", "2026-003"] 로 반환
+#     result = analyze_account_table._get_statement_ids(
+#         mock_lf,
+#         account_name="보통예금", 
+#         statement_id_col="전표번호", 
+#         account_col="계정과목"
+#     ).collect()
+#     # result = shape: (2,)\nSeries: '전표번호' [str]\n[\n      "2026-001"\n    "2026-003"\n]
+#     # 추후 to_series(), to_list() 해줘야 ["2026-001", "2026-003"] 로 반환
 
-    expected_result = ["2026-001", "2026-003"]
+#     expected_result = ["2026-001", "2026-003"]
 
-    assert sorted(result["전표번호"]) == sorted(expected_result)
+#     assert sorted(result["전표번호"]) == sorted(expected_result)
 
 def test__get_raw_data_success(analyze_account_table):
     mock_data = {
@@ -182,16 +182,9 @@ def test__get_raw_data_success(analyze_account_table):
     }
     mock_lf = pl.DataFrame(mock_data).lazy()
 
-    statement_ids = (
-        mock_lf.filter(pl.col("계정과목") == "보통예금")
-        .select("전표번호")
-        .unique()
-    )
-    # statement_ids = [shape: (2,)\nSeries: '전표번호' [str]\n[\n      "2026-001"\n    "2026-003"\n]] but in lazy state
-
-    result = analyze_account_table._get_raw_data(
-        statement_ids,
-        mock_lf
+    result = analyze_account_table._get_data(
+        mock_lf,
+        "보통예금"
     ).collect()
 
     expected_result = {
