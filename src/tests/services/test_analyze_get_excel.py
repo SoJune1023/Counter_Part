@@ -12,6 +12,14 @@ from src.exceptions import ClientError, InternalServerError
 def analyze_get_excel() -> AnalyzeGetExcel:
     return AnalyzeGetExcel()
 
+kwargs = {
+    "statement_id_col": "전표번호",
+    "account_id_col": "계정과목",
+    "debit_col": "차변",
+    "credit_col": "대변",
+    "summary_col": "적요"
+}
+
 def test_process_success(analyze_get_excel):
     mock_data = {
         "전표번호": ["2026-001", "2026-001", "2026-002"],
@@ -28,7 +36,7 @@ def test_process_success(analyze_get_excel):
     
         fake_file = io.BytesIO(b"fake excel data")
 
-        result = analyze_get_excel.process(fake_file)
+        result = analyze_get_excel.process(fake_file, **kwargs)
 
     expected_result_data = mock_data = {
         "전표번호": ["2026-001", "2026-002"],
@@ -56,6 +64,6 @@ def test_process_failed_wrong_column_name(analyze_get_excel):
         fake_file = io.BytesIO(b"fake excel data")
         
         with pytest.raises(ClientError, match="Could not find column in file. Please check column name."):
-            analyze_get_excel.process(fake_file)
+            analyze_get_excel.process(fake_file, **kwargs)
 
 # 나머지 테스트는 /src/tests/serivces/test_analyze_account_table에서 진행하였기에 패스합니다. (동일 로직)
