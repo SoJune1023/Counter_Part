@@ -10,7 +10,7 @@ from fastapi.responses import StreamingResponse, Response
 from src.services import AnalyzeAccountTable, AnalyzeGetExcel, AnalyzeGetTbTable
 from src.exceptions import InternalServerError, ClientError
 
-async def analyze_file(file: UploadFile):
+async def get_excel(file: UploadFile):
     try:
         loader = AnalyzeGetExcel()
 
@@ -44,7 +44,7 @@ async def analyze_file(file: UploadFile):
         logger.error("Unexpected exception detected while get excel data. Please contact me. email: ssojune@naver.com.", exc_info=True)
         raise InternalServerError(f"Unexpected exception on /analyze GET. Exc info: {str(e)}", 500) from e
 
-async def analyze_file_download(file: UploadFile):
+async def get_excel_download(file: UploadFile):
     try:
         loader = AnalyzeGetExcel()
 

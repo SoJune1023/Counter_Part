@@ -5,7 +5,10 @@ from fastapi import APIRouter, status, File, UploadFile, Form, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 
-from src.handlers import analyze_account_table, analyze_file, analyze_account_table_download, analyze_file_download, analyze_get_tb_table, analyze_get_tb_table_download
+from src.handlers import (
+    analyze_account_table, analyze_account_table_download,
+    analyze_get_tb_table, analyze_get_tb_table_download
+)
 
 def get_resource_path(relative_path):
     if hasattr(sys, '_MEIPASS'):
