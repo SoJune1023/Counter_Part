@@ -6,6 +6,7 @@ from unittest.mock import patch
 from polars.exceptions import ShapeError
 
 from src.exceptions import ClientError
+from src.schemas import AnalyzeRequestSchema
 
 from src.interfaces.base_analyze_excel import BaseAnalyzeExcel
 
@@ -14,7 +15,7 @@ class TestAnalyzeExcel(BaseAnalyzeExcel):
         self,
         lf: pl.LazyFrame,
         *args,
-        **kwargs
+        data
     ) -> pl.LazyFrame:
         pass
 
@@ -22,7 +23,7 @@ class TestAnalyzeExcel(BaseAnalyzeExcel):
         self,
         df: pl.DataFrame,
         *args,
-        **kwargs
+        data
     ) -> pl.DataFrame:
         pass
 
@@ -37,6 +38,8 @@ kwargs = {
     "credit_col": "대변",
     "summary_col": "적요"
 }
+
+data = AnalyzeRequestSchema(**kwargs)
 
 def test_read_excel_success(test_analyze_excel):
     mock_data = {
@@ -68,7 +71,7 @@ def test__read_excel_failed_shape_error(test_analyze_excel):
         fake_file = io.BytesIO(b"fake excel data")
         
         with pytest.raises(ClientError, match="Could not create dataform."):
-            test_analyze_excel._read_excel(fake_file, **kwargs)
+            test_analyze_excel._read_excel(fake_file,  **kwargs)
 
 def test__read_excel_failed_no_data(test_analyze_excel):
     mock_data = {
@@ -86,7 +89,7 @@ def test__read_excel_failed_no_data(test_analyze_excel):
         fake_file = io.BytesIO(b"fake excel data")
         
         with pytest.raises(ClientError, match="There is no data to get"):
-            test_analyze_excel._read_excel(fake_file, **kwargs)
+            test_analyze_excel._read_excel(fake_file,  **kwargs)
 
 def test__collect_success(test_analyze_excel):
     mock_data = {

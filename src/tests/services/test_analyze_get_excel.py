@@ -5,8 +5,10 @@ import pytest
 from unittest.mock import patch
 from polars.exceptions import ShapeError, ColumnNotFoundError
 
-from src.services.analyze_get_excel import AnalyzeGetExcel
+from src.schemas import AnalyzeRequestSchema
 from src.exceptions import ClientError, InternalServerError
+
+from src.services.analyze_get_excel import AnalyzeGetExcel
 
 @pytest.fixture
 def analyze_get_excel() -> AnalyzeGetExcel:
@@ -19,6 +21,8 @@ kwargs = {
     "credit_col": "대변",
     "summary_col": "적요"
 }
+
+data = AnalyzeRequestSchema(**kwargs)
 
 def test_process_success(analyze_get_excel):
     mock_data = {
@@ -36,7 +40,7 @@ def test_process_success(analyze_get_excel):
     
         fake_file = io.BytesIO(b"fake excel data")
 
-        result = analyze_get_excel.process(fake_file, **kwargs)
+        result = analyze_get_excel.process(fake_file,data)
 
     expected_result_data = mock_data = {
         "전표번호": ["2026-001", "2026-002"],
@@ -64,6 +68,6 @@ def test_process_failed_wrong_column_name(analyze_get_excel):
         fake_file = io.BytesIO(b"fake excel data")
         
         with pytest.raises(ClientError, match="Could not find column in file. Please check column name."):
-            analyze_get_excel.process(fake_file, **kwargs)
+            analyze_get_excel.process(fake_file, data)
 
 # 나머지 테스트는 /src/tests/serivces/test_analyze_account_table에서 진행하였기에 패스합니다. (동일 로직)

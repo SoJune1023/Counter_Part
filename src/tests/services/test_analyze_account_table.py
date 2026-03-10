@@ -3,9 +3,10 @@ import io
 import pytest
 
 from unittest.mock import patch
+from src.exceptions import ClientError
+from src.schemas import AnalyzeRequestSchema
 
 from src.services.analyze_account_table import AnalyzeAccountTable
-from src.exceptions import ClientError
 
 @pytest.fixture
 def analyze_account_table():
@@ -20,6 +21,8 @@ kwargs = {
     "credit_col": "대변",
     "summary_col": "적요"
 }
+
+data = AnalyzeRequestSchema(**kwargs)
 
 def test_analyze_account_table_success(analyze_account_table):
     mock_data = {
@@ -36,7 +39,7 @@ def test_analyze_account_table_success(analyze_account_table):
         
         fake_file = io.BytesIO(b"fake excel data")
         
-        result = analyze_account_table.process(fake_file, **kwargs)
+        result = analyze_account_table.process(fake_file, data)
 
     expected_result = pl.DataFrame([
         {
@@ -77,7 +80,7 @@ def test_analyze_account_table_failed_wrong_column_name(analyze_account_table):
         fake_file = io.BytesIO(b"fake excel data")
         
         with pytest.raises(ClientError, match="Could not find column in file. Please check column name."):
-            analyze_account_table.process(fake_file, **kwargs)
+            analyze_account_table.process(fake_file, data)
 
 def test_analyze_account_table_failed_type_error(analyze_account_table):
     with patch("polars.read_excel") as mock_read:
@@ -86,7 +89,7 @@ def test_analyze_account_table_failed_type_error(analyze_account_table):
         fake_file = io.BytesIO(b"fake excel data")
         
         with pytest.raises(ClientError, match="Wrong type detected in file."):
-            analyze_account_table.process(fake_file, **kwargs)
+            analyze_account_table.process(fake_file, data)
 
 def test__get_data_success(analyze_account_table):
     mock_data = {
@@ -166,6 +169,5 @@ def test__pivot_success(analyze_account_table):
     ]).select([
         "전표번호", "분류", "적요", "소모품비(차변)", "보통예금(차변)", "보통예금(대변)"
     ]).sort(["전표번호", "적요"])
-
 
     assert result.select(expected_result.columns).equals(expected_result)
