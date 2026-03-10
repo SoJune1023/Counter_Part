@@ -85,12 +85,12 @@ class BaseAnalyzeExcel(ABC):
         file_ptr: IO[bytes],
         **kwargs
     ) -> pl.DataFrame:
-        lf = self._read_excel(file_ptr)
+        lf = self._read_excel(file_ptr, **kwargs)
 
-        raw_data = self._get_data(lf, kwargs)
+        raw_data = self._get_data(lf, **kwargs)
 
         collected_data = self._collect(raw_data)
 
-        pivoted_data = self._pivot(collected_data, kwargs)
+        pivoted_data = self._pivot(collected_data, **kwargs)
 
         return pivoted_data
