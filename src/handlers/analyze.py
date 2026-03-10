@@ -7,10 +7,11 @@ logger = logging.getLogger(__name__)
 from fastapi import UploadFile
 from fastapi.responses import StreamingResponse, Response
 
+from src.schemas import AnalyzeRequestSchema
 from src.services import AnalyzeAccountTable, AnalyzeGetExcel, AnalyzeGetTbTable
 from src.exceptions import InternalServerError, ClientError
 
-async def analyze_file(file: UploadFile):
+async def get_excel(file: UploadFile, data: AnalyzeRequestSchema):
     try:
         loader = AnalyzeGetExcel()
 
@@ -23,7 +24,8 @@ async def analyze_file(file: UploadFile):
         result = await loop.run_in_executor(
             None,
             loader.process,
-            content
+            content,
+            data
         )
 
         arrow_table = result.to_arrow()
@@ -44,7 +46,7 @@ async def analyze_file(file: UploadFile):
         logger.error("Unexpected exception detected while get excel data. Please contact me. email: ssojune@naver.com.", exc_info=True)
         raise InternalServerError(f"Unexpected exception on /analyze GET. Exc info: {str(e)}", 500) from e
 
-async def analyze_file_download(file: UploadFile):
+async def get_excel_download(file: UploadFile, data: AnalyzeRequestSchema):
     try:
         loader = AnalyzeGetExcel()
 
@@ -57,7 +59,8 @@ async def analyze_file_download(file: UploadFile):
         result = await loop.run_in_executor(
             None,
             loader.process,
-            content
+            content,
+            data
         )
 
         # upload result file to memory
@@ -80,9 +83,9 @@ async def analyze_file_download(file: UploadFile):
         logger.error("Unexpected exception detected while get excel data. Please contact me. email: ssojune@naver.com.", exc_info=True)
         raise InternalServerError(f"Unexpected exception on /analyze GET. Exc info: {str(e)}", 500) from e
 
-async def analyze_account_table(file: UploadFile, account_name: str):
+async def analyze_account_table(file: UploadFile, data: AnalyzeRequestSchema):
     try:
-        analyzer = AnalyzeAccountTable()
+        loader = AnalyzeAccountTable()
 
         content = await file.read()
 
@@ -92,9 +95,9 @@ async def analyze_account_table(file: UploadFile, account_name: str):
 
         result = await loop.run_in_executor(
             None,
-            analyzer.process,
+            loader.process,
             content,
-            account_name
+            data
         )
         
         arrow_table = result.to_arrow()
@@ -115,9 +118,9 @@ async def analyze_account_table(file: UploadFile, account_name: str):
         logger.error("Unexpected exception detected while analyze data. Please contact me. email: ssojune@naver.com.", exc_info=True)
         raise InternalServerError(f"Unexpected exception on /analyze/account_table POST. Exc info: {str(e)}", 500) from e
 
-async def analyze_account_table_download(file: UploadFile, account_name: str):
+async def analyze_account_table_download(file: UploadFile, data: AnalyzeRequestSchema):
     try:
-        analyzer = AnalyzeAccountTable()
+        loader = AnalyzeAccountTable()
 
         content = await file.read()
 
@@ -127,9 +130,9 @@ async def analyze_account_table_download(file: UploadFile, account_name: str):
 
         result = await loop.run_in_executor(
             None,
-            analyzer.process,
+            loader.process,
             content,
-            account_name
+            data
         )
         
         # upload result file to memory
@@ -152,7 +155,7 @@ async def analyze_account_table_download(file: UploadFile, account_name: str):
         logger.error("Unexpected exception detected while analyze data. Please contact me. email: ssojune@naver.com.", exc_info=True)
         raise InternalServerError(f"Unexpected exception on /analyze/account_table POST. Exc info: {str(e)}", 500) from e
 
-async def analyze_get_tb_table(file: UploadFile):
+async def analyze_get_tb_table(file: UploadFile, data: AnalyzeRequestSchema):
     try:
         loader = AnalyzeGetTbTable()
 
@@ -165,7 +168,8 @@ async def analyze_get_tb_table(file: UploadFile):
         result = await loop.run_in_executor(
             None,
             loader.process,
-            content
+            content,
+            data
         )
 
         arrow_table = result.to_arrow()
@@ -186,9 +190,9 @@ async def analyze_get_tb_table(file: UploadFile):
         logger.error("Unexpected exception detected while get excel data. Please contact me. email: ssojune@naver.com.", exc_info=True)
         raise InternalServerError(f"Unexpected exception on /analyze GET. Exc info: {str(e)}", 500) from e
 
-async def analyze_get_tb_table_download(file: UploadFile, account_name: str):
+async def analyze_get_tb_table_download(file: UploadFile, data: AnalyzeRequestSchema):
     try:
-        analyzer = AnalyzeGetTbTable()
+        loader = AnalyzeGetTbTable()
 
         content = await file.read()
 
@@ -198,9 +202,9 @@ async def analyze_get_tb_table_download(file: UploadFile, account_name: str):
 
         result = await loop.run_in_executor(
             None,
-            analyzer.process,
+            loader.process,
             content,
-            account_name
+            data
         )
         
         # upload result file to memory

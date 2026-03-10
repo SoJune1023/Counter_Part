@@ -2,10 +2,11 @@ import polars as pl
 import logging
 logger = logging.getLogger(__name__)
 
-from typing import IO
+from typing import IO, Dict
 from abc import ABC, abstractmethod
 from polars.exceptions import ShapeError, ColumnNotFoundError
 
+from src.schemas import AnalyzeRequestSchema
 from src.exceptions import ClientError
 
 class BaseAnalyzeExcel(ABC):
@@ -20,6 +21,12 @@ class BaseAnalyzeExcel(ABC):
         "summary_col": "적요"
     }
     """
+    def _to_kwargs(
+        self,
+        data: AnalyzeRequestSchema
+    ) -> Dict[str, str]:
+        return data.model_dump()
+
     def _read_excel(
         self,
         file_ptr: IO[bytes],
@@ -76,15 +83,17 @@ class BaseAnalyzeExcel(ABC):
     def _pivot(
         self,
         df: pl.DataFrame,
-        **kwargs
+        data: AnalyzeRequestSchema
     ) -> pl.DataFrame:
         pass
 
     def process(
         self,
         file_ptr: IO[bytes],
-        **kwargs
+        data: AnalyzeRequestSchema
     ) -> pl.DataFrame:
+        kwargs = self._to_kwargs(data)
+
         lf = self._read_excel(file_ptr, **kwargs)
 
         raw_data = self._get_data(lf, **kwargs)

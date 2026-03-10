@@ -11,6 +11,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusDiv = document.getElementById('statusText');
     const fileNameSpan = document.getElementById('fileName');
 
+    var request_dict = {}
+    request_dict['statement_id_col'] = '전표번호';
+    request_dict['account_id_col'] = '계정과목';
+    request_dict['debit_col'] = '차변';
+    request_dict['credit_col'] = '대변';
+    request_dict['summary_col'] = '적요';
+
     const numberFormatter = (params) => {
         if (params.value == null) { return ''; }
         
@@ -45,6 +52,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData();
         formData.append('file', fileInput.files[0]);
 
+        for (var key in request_dict) {
+            formData.append(key, request_dict[key]);
+        }
+
         try {
             uploadBtn.disabled = true;
             statusDiv.innerText = "파일 분석 및 스트리밍 중 . . .";
@@ -55,7 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             
             if (!response.ok) throw new Error('서버 처리 실패');
-
             
             const table = await tableFromIPC(response);
 
@@ -126,7 +136,10 @@ document.addEventListener('DOMContentLoaded', () => {
     uploadedDownloadBtn.onclick = async () => {
         const formData = new FormData();
         formData.append('file', fileInput.files[0]);
-        formData.append('account_name', accountNameInput.value.trim());
+
+        for (var key in request_dict) {
+            formData.append(key, request_dict[key]);
+        }
 
         try {
             uploadedDownloadBtn.disabled = true;
@@ -166,8 +179,13 @@ document.addEventListener('DOMContentLoaded', () => {
     analyzeBtn.onclick = async () => {
         const formData = new FormData();
         formData.append('file', fileInput.files[0]);
-        formData.append('account_name', accountNameInput.value.trim());
+        formData.append('selected_account_id', accountNameInput.value.trim());
+        formData.append('classification_col', '분류');
 
+        for (var key in request_dict) {
+            formData.append(key, request_dict[key]);
+        }
+        
         try {
             analyzeBtn.disabled = true;
             statusDiv.innerText = "데이터 분석 및 스트리밍 중 . . .";
@@ -248,8 +266,13 @@ document.addEventListener('DOMContentLoaded', () => {
     analyzeDownloadBtn.onclick = async () => {
         const formData = new FormData();
         formData.append('file', fileInput.files[0]);
-        formData.append('account_name', accountNameInput.value.trim());
+        formData.append('selected_account_id', accountNameInput.value.trim());
+        formData.append('classification_col', '분류');
 
+        for (var key in request_dict) {
+            formData.append(key, request_dict[key]);
+        }
+        
         try {
             analyzeDownloadBtn.disabled = true;
             statusDiv.innerText = "데이터 다운로드 중 . . .";
