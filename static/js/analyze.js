@@ -11,12 +11,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusDiv = document.getElementById('statusText');
     const fileNameSpan = document.getElementById('fileName');
 
-    var request_dict = {}
-    request_dict['statement_id_col'] = '전표번호';
-    request_dict['account_id_col'] = '계정과목';
-    request_dict['debit_col'] = '차변';
-    request_dict['credit_col'] = '대변';
-    request_dict['summary_col'] = '적요';
+    const statementIdCol = document.getElementById('statement_id_col');
+    const accountIdCol = document.getElementById('account_id_col');
+    const debitCol = document.getElementById('debit_col');
+    const creditCol = document.getElementById('credit_col');
+    const summaryCol = document.getElementById('summary_col');
 
     const numberFormatter = (params) => {
         if (params.value == null) { return ''; }
@@ -52,9 +51,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData();
         formData.append('file', fileInput.files[0]);
 
-        for (var key in request_dict) {
-            formData.append(key, request_dict[key]);
-        }
+        formData.append('statement_id_col', statementIdCol.value.trim());
+        formData.append('account_id_col', accountIdCol.value.trim());
+        formData.append('debit_col', debitCol.value.trim());
+        formData.append('credit_col', creditCol.value.trim());
+        formData.append('summary_col', summaryCol.value.trim());
 
         try {
             uploadBtn.disabled = true;
@@ -137,9 +138,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData();
         formData.append('file', fileInput.files[0]);
 
-        for (var key in request_dict) {
-            formData.append(key, request_dict[key]);
-        }
+        formData.append('statement_id_col', statementIdCol.value.trim());
+        formData.append('account_id_col', accountIdCol.value.trim());
+        formData.append('debit_col', debitCol.value.trim());
+        formData.append('credit_col', creditCol.value.trim());
+        formData.append('summary_col', summaryCol.value.trim());
 
         try {
             uploadedDownloadBtn.disabled = true;
@@ -182,9 +185,11 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('selected_account_id', accountNameInput.value.trim());
         formData.append('classification_col', '분류');
 
-        for (var key in request_dict) {
-            formData.append(key, request_dict[key]);
-        }
+        formData.append('statement_id_col', statementIdCol.value.trim());
+        formData.append('account_id_col', accountIdCol.value.trim());
+        formData.append('debit_col', debitCol.value.trim());
+        formData.append('credit_col', creditCol.value.trim());
+        formData.append('summary_col', summaryCol.value.trim());
         
         try {
             analyzeBtn.disabled = true;
@@ -269,9 +274,11 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('selected_account_id', accountNameInput.value.trim());
         formData.append('classification_col', '분류');
 
-        for (var key in request_dict) {
-            formData.append(key, request_dict[key]);
-        }
+        formData.append('statement_id_col', statementIdCol.value.trim());
+        formData.append('account_id_col', accountIdCol.value.trim());
+        formData.append('debit_col', debitCol.value.trim());
+        formData.append('credit_col', creditCol.value.trim());
+        formData.append('summary_col', summaryCol.value.trim());
         
         try {
             analyzeDownloadBtn.disabled = true;

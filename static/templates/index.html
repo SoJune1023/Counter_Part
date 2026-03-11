@@ -22,9 +22,16 @@
             <button id="uploadedDownloadBtn" disabled>분석 파일 다운로드</button>
         </div>
         <div class="analuze-upload-button">
-            <input type="text" id="accountNameInput" placeholder="계정과목 컬럼명 입력" value="계정과목">
+            <input type="text" id="accountNameInput" placeholder="분석할 계정과목 입력" value="계정과목">
             <button id="analyzeBtn" disabled>데이터 변환</button>
             <button id="analyzeDownloadBtn" disabled>데이터 다운로드</button>
+        </div>
+        <div class="column-name-sections">
+            <input type="text" id="statement_id_col" placeholder="전표번호 컬럼명 입력" value="전표번호">
+            <input type="text" id="account_id_col" placeholder="게정과목 컬럼명 입력" value="계정과목">
+            <input type="text" id="debit_col" placeholder="차변 컬럼명 입력" value="차변">
+            <input type="text" id="credit_col" placeholder="대변 컬럼명 입력" value="대변">
+            <input type="text" id="summary_col" placeholder="적요 컬럼명 입력" value="적요">
         </div>
         <div id="statusText" class="status-bar">파일 업로드 필요.</div>
     </div>
