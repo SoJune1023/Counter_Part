@@ -83,7 +83,7 @@ class BaseAnalyzeExcel(ABC):
     def _pivot(
         self,
         df: pl.DataFrame,
-        data: AnalyzeRequestSchema
+        **kwargs
     ) -> pl.DataFrame:
         pass
 

@@ -22,18 +22,18 @@ class AnalyzeGetTbTable(BaseAnalyzeExcel):
 
     def _pivot(
         self,
-        data: pl.DataFrame,
+        df: pl.DataFrame,
         **kwargs
     ) -> pl.DataFrame:
         account_chabun_sum = (
-            data
+            df
             .group_by([kwargs['account_id_col']])
             .agg(pl.col(kwargs['debit_col']).sum().alias("_amount"))
             .with_columns(pl.lit(kwargs['debit_col']).alias("_type"))
         )
 
         account_daebun_sum = (
-            data
+            df
             .group_by([kwargs['account_id_col']])
             .agg(pl.col(kwargs['credit_col']).sum().alias("_amount"))
             .with_columns(pl.lit(kwargs['credit_col']).alias("_type"))

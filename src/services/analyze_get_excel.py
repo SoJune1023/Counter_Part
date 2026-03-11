@@ -33,11 +33,11 @@ class AnalyzeGetExcel(BaseAnalyzeExcel):
 
     def _pivot(
         self,
-        data: pl.DataFrame,
+        df: pl.DataFrame,
         **kwargs
     ) -> pl.DataFrame:
         """Pivot data to object schema and sort it. Then return."""
-        result = data.group_by(kwargs['statement_id_col']).agg([
+        result = df.group_by(kwargs['statement_id_col']).agg([
             pl.col(kwargs['summary_col']).first().alias(kwargs['summary_col']),
             pl.col(kwargs['debit_col']).sum().alias(kwargs['debit_col']),
             pl.col(kwargs['credit_col']).sum().alias(kwargs['credit_col'])
